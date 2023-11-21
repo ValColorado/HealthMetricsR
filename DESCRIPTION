@@ -1,0 +1,11 @@
+Package: SciCompPackage
+Type: Package
+Title: HealthMetricsR
+Version: 0.1.0
+Author: Valentina Colorado
+Maintainer: The package maintainer <valentina_colorado@yahoo.com>
+Description: A comprehensive toolset for health-conscious individuals, fitness enthusiasts, and professionals seeking robust calculations and analytics. The package integrates functions for fundamental health measurements and extends its capabilities to nutrition calculations and fitness metrics.
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.2.3
