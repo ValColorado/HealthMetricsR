@@ -1,0 +1,11 @@
+---
+title: "Untitled"
+author: "Valentina Colorado"
+date: "2023-11-26"
+output: html_document
+---
+
+```{r}
+read.csv("./50x0_Person_Gender_Height_Weight_Index.csv")
+```
+
