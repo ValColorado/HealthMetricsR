@@ -173,6 +173,9 @@ server <- function(input, output, session) {
     output$userComparisonPlot <- renderPlotly({
       plot
     })
+
+    updateTextInput(session, "myTextInput", value = as.character(bmr_male_rounded))
+
   })
 
   observeEvent(input$calcFemale, {
@@ -203,6 +206,9 @@ server <- function(input, output, session) {
     output$userComparisonPlot <- renderPlotly({
       plot
     })
+
+    updateTextInput(session, "myTextInput", value = as.character(bmr_female_rounded))
+
   })
 }
 
