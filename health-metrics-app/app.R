@@ -101,7 +101,7 @@ ui <- dashboardPage(
               )
       ),
       tabItem(tabName = "TDEE",
-              h2("Welcome to the Settings Page!"),
+              h2("TDEE"),
               grid_card(
                 area = "area4",
                 card_body(
@@ -138,10 +138,13 @@ ui <- dashboardPage(
                   ),
                   column(width = 3,
                          actionButton("calculateButtonTDEE", "Calculate Weight Loss")),
-                  column(width = 3,
+                  column(width = 7,
+                         verbatimTextOutput("caloriesOutput")),
+                  fluidRow(
+                    column(width = 3,
                          tableOutput("weightLossTable")),
                   column(width = 6,
-                        plotOutput("weightLossPlot")),
+                        plotOutput("weightLossPlot")),),
                 )
               ),
 
@@ -242,13 +245,22 @@ server <- function(input, output, session) {
     # Calculate weight loss projections
     num_weeks <- 20  # Default number of weeks
     weight_loss_data <- (calculate_weight_loss(bmr, activity_multiplier, num_weeks))$table
-    print(weight_loss_data)
+    remaining_calories_per_week <- calculate_weight_loss(bmr, activity_multiplier, num_weeks)$calories
+
+    showModal(modalDialog(
+      title = "Calories",
+      paste("To lose weight at the displayed rate you need to burn", remaining_calories_per_week," per week"),
+
+    ))
+
+
     output$weightLossTable <- renderTable({
       calculate_weight_loss(bmr, activity_multiplier, num_weeks)$table
     })
     output$weightLossPlot <- renderPlot({
       calculate_weight_loss(bmr, activity_multiplier, num_weeks)$plot
     })
+
   })
 
 
