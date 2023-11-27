@@ -6,12 +6,13 @@ library(ggplot2)
 
 ui <- dashboardPage(
 
-  dashboardHeader(title = "Health-MetricsR"),
+  dashboardHeader(title = "MyFitnessFriend"),
   dashboardSidebar(
     sidebarMenu(
       menuItem("Home", tabName = "home", icon = icon("home")),
       menuItem("Measurements", tabName = "measurements", icon = icon("dashboard")),
-      menuItem("Total Daily Energy Expenditure", tabName = "TDEE", icon = icon("gear"))
+      menuItem("Total Daily Energy Expenditure", tabName = "TDEE", icon = icon("person-walking")),
+      menuItem("Macronutrients", tabName = "macro", icon=icon("utensils"))
     )
   ),
   dashboardBody(
@@ -24,9 +25,10 @@ ui <- dashboardPage(
                 card_body(
                   markdown(
                     mds = c(
-                      "Before we get started lets go over some key terms:",
+                      "Before we get started I want to say .. these are **generalized** guidelines and should be adjusted based on individual needs and goals. Consulting a nutritionist or dietitian could provide personalized recommendations.",
                       "",
                       "",
+                      "Key Terms:",
                       "**Basic Metabolic Rate (BMR)**",
                       "",
                       "You burn calories even when resting through basic life-sustaining functions like breathing, circulation, nutrient processing, and cell production. This is known as basal metabolic rate (BMR).",
@@ -114,7 +116,6 @@ ui <- dashboardPage(
                   )
                 )
               ),
-
               grid_card(
                 area = "area3",
                 card_body(
@@ -149,13 +150,31 @@ ui <- dashboardPage(
               ),
 
 
-      )
+      ),
+      tabItem(tabName = "macro",
+              h2("Macronutrients"),
 
+                grid_card(
+                  area = "area11",
+                  card_body(
+                    textInput(
+                      inputId = "myCaloriesInput",
+                      label = "Enter Goal Calories ",
+                      value = "",
+                      placeholder = "Calories from second tab"
+                    ),
+
+                ),
+                column(width = 6,
+                       actionButton("findMacros", "Find my macros!")
+                ),
+                dataTableOutput("macrosTable")
+              )
+
+      )
     )
   )
 )
-
-# Server logic
 # Server logic
 server <- function(input, output, session) {
 
@@ -231,8 +250,8 @@ server <- function(input, output, session) {
   observeEvent(input$calculateButtonTDEE, {
 
 
-    bmr <- as.numeric(input$myTextInput)
-    activity_multiplier <- switch(input$workout,
+    bmr <<- as.numeric(input$myTextInput)
+    activity_multiplier <<- switch(input$workout,
                                   "1" = 1.2,
                                   "2" = 1.375,
                                   "3" = 1.55,
@@ -243,7 +262,7 @@ server <- function(input, output, session) {
     tdee <- bmr * activity_multiplier
 
     # Calculate weight loss projections
-    num_weeks <- 20  # Default number of weeks
+    num_weeks <<- 20  # Default number of weeks
     weight_loss_data <- (calculate_weight_loss(bmr, activity_multiplier, num_weeks))$table
     remaining_calories_per_week <- calculate_weight_loss(bmr, activity_multiplier, num_weeks)$calories
 
@@ -253,6 +272,7 @@ server <- function(input, output, session) {
 
     ))
 
+    solution<<-calculate_weight_loss(bmr, activity_multiplier, num_weeks)
 
     output$weightLossTable <- renderTable({
       calculate_weight_loss(bmr, activity_multiplier, num_weeks)$table
@@ -261,9 +281,26 @@ server <- function(input, output, session) {
       calculate_weight_loss(bmr, activity_multiplier, num_weeks)$plot
     })
 
+
+    updateTextInput(session, "myCaloriesInput", value = as.character(solution$recommendedCalories))
+
+
   })
 
+  observeEvent(input$findMacros, {
 
+
+      df <- data.frame(
+      Calories = solution$recommendedCalories,
+      Fat = solution$recommendedFat,
+      Protein = solution$recommendedProtein
+    )
+
+    output$macrosTable <- renderDataTable({
+      df
+    })
+
+    })
 
 }
 
