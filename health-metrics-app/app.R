@@ -2,7 +2,7 @@ library(shiny)
 library(shinydashboard)
 library(SciCompPackage)
 library(plotly)  # Adding the plotly library
-
+library(ggplot2)
 
 ui <- dashboardPage(
 
@@ -32,7 +32,12 @@ ui <- dashboardPage(
                       "You burn calories even when resting through basic life-sustaining functions like breathing, circulation, nutrient processing, and cell production. This is known as basal metabolic rate (BMR).",
                       "",
                       "",
-                      "You can calculate yours by going to the 'Measurements' tab! We calculate this by using the [Mifflin-St. Jeor equation](https://pubmed.ncbi.nlm.nih.gov/2305711/)"
+                      "You can calculate yours by going to the 'Measurements' tab! We calculate this by using the [Mifflin-St. Jeor equation](https://pubmed.ncbi.nlm.nih.gov/2305711/)",
+                      "",
+                      "",
+                      "**Total Daily Energy Expenditure [TDEE](https://www.forbes.com/health/body/tdee-calculator/)**",
+                      "",
+                      "estimates the amount of energy (or number of calories) your body burns over a 24-hour period, factoring in how much energy it uses while at rest, your typical level of physical activity and the thermic effect of food metabolism."
                     )
                   )
                 )
@@ -92,7 +97,7 @@ ui <- dashboardPage(
                      actionButton("calcFemale", "Calculate BMR Female")
               ),
               column(width = 6,
-                     plotlyOutput("userComparisonPlot")  # Placeholder for the comparison plot
+                     plotlyOutput("userComparisonPlot")
               )
       ),
       tabItem(tabName = "TDEE",
@@ -111,30 +116,37 @@ ui <- dashboardPage(
               ),
 
               grid_card(
-    area = "area3",
-    card_body(
-      textInput(
-        inputId = "myTextInput",
-        label = "Enter BMR ",
-        value = "",
-        placeholder = "BMR from first tab"
-      ),
-      checkboxGroupInput(
-        inputId = "workout",
-        label = "Activity Level",
-        choices = list(
-          "Sedentary (little to no exercise):" = "1",
-          "Lightly active (1-3 days a week)" = "2",
-          "Moderately active (sports 3-5 days a week): " = "3",
-          "Very active (sports 6-7 days a week): " = "4",
-          "Extra active (training twice a day" = "5"
-        )
+                area = "area3",
+                card_body(
+                  textInput(
+                    inputId = "myTextInput",
+                    label = "Enter BMR ",
+                    value = "",
+                    placeholder = "BMR from first tab"
+                  ),
+                  radioButtons(
+                    inputId = "workout",
+                    label = "Activity Level",
+                    choices = list(
+                      "Sedentary (little to no exercise):" = "1",
+                      "Lightly active (1-3 days a week)" = "2",
+                      "Moderately active (sports 3-5 days a week): " = "3",
+                      "Very active (sports 6-7 days a week): " = "4",
+                      "Extra active (training twice a day)" = "5"
+                    ),
+                    selected = NULL
+                  ),
+                  column(width = 3,
+                         actionButton("calculateButtonTDEE", "Calculate Weight Loss")),
+                  column(width = 3,
+                         tableOutput("weightLossTable")),
+                  column(width = 6,
+                        plotOutput("weightLossPlot")),
+                )
+              ),
+
+
       )
-    )
-  ),
-
-
-              )
 
     )
   )
@@ -210,6 +222,37 @@ server <- function(input, output, session) {
     updateTextInput(session, "myTextInput", value = as.character(bmr_female_rounded))
 
   })
+
+
+
+  observeEvent(input$calculateButtonTDEE, {
+
+
+    bmr <- as.numeric(input$myTextInput)
+    activity_multiplier <- switch(input$workout,
+                                  "1" = 1.2,
+                                  "2" = 1.375,
+                                  "3" = 1.55,
+                                  "4" = 1.725,
+                                  "5" = 1.9)
+    # Calculate TDEE (Total Daily Energy Expenditure) based on activity level
+    activity_multiplier <- as.numeric(input$workout)
+    tdee <- bmr * activity_multiplier
+
+    # Calculate weight loss projections
+    num_weeks <- 20  # Default number of weeks
+    weight_loss_data <- (calculate_weight_loss(bmr, activity_multiplier, num_weeks))$table
+    print(weight_loss_data)
+    output$weightLossTable <- renderTable({
+      calculate_weight_loss(bmr, activity_multiplier, num_weeks)$table
+    })
+    output$weightLossPlot <- renderPlot({
+      calculate_weight_loss(bmr, activity_multiplier, num_weeks)$plot
+    })
+  })
+
+
+
 }
 
 shinyApp(ui = ui, server = server)
