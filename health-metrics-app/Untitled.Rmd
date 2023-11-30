@@ -8,4 +8,14 @@ output: html_document
 ```{r}
 read.csv("./50x0_Person_Gender_Height_Weight_Index.csv")
 ```
+```{r}
+library(openintro)
+```
+```{r}
+library(openintro)
+```
+
+```{r}
+fastfood
+```
 

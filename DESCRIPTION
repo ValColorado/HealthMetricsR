@@ -1,6 +1,6 @@
-Package: SciCompPackage
+Package: MyFitnessFriend
 Type: Package
-Title: HealthMetricsR
+Title: MyFitnessFriend
 Version: 0.1.0
 Author: Valentina Colorado
 Maintainer: The package maintainer <valentina_colorado@yahoo.com>

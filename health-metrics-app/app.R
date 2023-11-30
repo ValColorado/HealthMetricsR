@@ -1,8 +1,9 @@
 library(shiny)
 library(shinydashboard)
-library(SciCompPackage)
+library(MyFitnessFriend)
 library(plotly)  # Adding the plotly library
 library(ggplot2)
+library(openintro)
 
 ui <- dashboardPage(
 
@@ -46,7 +47,9 @@ ui <- dashboardPage(
               )
 
       ),
-      tabItem(tabName = "measurements",
+      tabItem(
+        tabName = "measurements",
+        h2("Enter your measurements"),
               fluidRow(
                 column(width = 3,
                        grid_card(
@@ -75,7 +78,7 @@ ui <- dashboardPage(
                            numericInput(
                              inputId = "heightInches",
                              label = "Inches",
-                             value = 4
+                             value = ""
                            )
                          )
                        )
@@ -166,9 +169,28 @@ ui <- dashboardPage(
 
                 ),
                 column(width = 6,
+                       height=2,
                        actionButton("findMacros", "Find my macros!")
                 ),
-                dataTableOutput("macrosTable")
+                column(
+                width = 12,
+                dataTableOutput("macrosTable"),
+                conditionalPanel(
+                  condition = "input.findMacros > 0",
+                  radioButtons(
+                    inputId = "food",
+                    label = "Food Options",
+                    choices = list(
+                      "Fast Food:" = "1",
+                      "Individual Options" = "2"
+                    ),
+                    selected = NULL
+                  ),
+                  actionButton("new", "Lets Eat")
+                ),
+
+                )
+
               )
 
       )
@@ -231,7 +253,7 @@ server <- function(input, output, session) {
     ))
     gender <- "Female"
     user_data <- data[data$Gender == gender, c("Weight", "Height")]
-    plot <- plot_ly(data = user_data, x = ~Weight, y = ~Height, type = 'scatter', mode = 'markers',
+    plot <- plot_ly(data = user_data, x = ~Weight, y = ~Height, type = 'scatter', mode = 'markers',name = "Sample Data",
                     marker = list(size = 10, opacity = 0.8)) %>%
       add_trace(x = weight_kg, y = height_cm, type = 'scatter', mode = 'markers',
                 marker = list(size = 12, color = 'red', symbol = 'star'),
@@ -300,8 +322,44 @@ server <- function(input, output, session) {
       df
     })
 
+
+
+    observeEvent(input$new, {
+      if (input$new > 0) {
+        if (input$food == "1") {
+          fastfood <- openintro::fastfood
+          df <- data.frame(
+            Calories = solution$recommendedCalories,
+            Fat = solution$recommendedFat,
+            Protein = solution$recommendedProtein
+          )
+          protein_threshold <- as.numeric(df$Protein)
+
+          # Filter fast_food dataset based on protein threshold
+          filtered_fast_food <- fastfood[fastfood$protein <= protein_threshold, ]
+
+          # Filter and display at least 5 options from each restaurant that meet the protein condition
+          output$macrosTable <- renderDataTable({
+            restaurant_options <- by(filtered_fast_food, filtered_fast_food$restaurant, function(subset) {
+              subset[subset$protein <= protein_threshold, ][1:min(5, nrow(subset)), ]
+            })
+            do.call(rbind, restaurant_options)
+          })
+        } else {
+          df <- data.frame(
+            Calories = solution$recommendedCalories,
+            Fat = solution$recommendedFat,
+            Protein = solution$recommendedProtein
+          )
+
+          output$macrosTable <- renderDataTable({
+            df
+          })
+        }
+      }
     })
 
+  })
 }
 
 shinyApp(ui = ui, server = server)
