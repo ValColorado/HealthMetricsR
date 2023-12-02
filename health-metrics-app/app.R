@@ -51,60 +51,60 @@ ui <- dashboardPage(
       tabItem(
         tabName = "measurements",
         h2("Enter your measurements"),
-              fluidRow(
-                column(width = 3,
-                       grid_card(
-                         area = "area1",
-                         card_body(
-                           textInput(
-                             inputId = "currentW",
-                             label = "Enter your current weight",
-                             value = "",
-                             placeholder = "Enter your weight in lbs"
-                           )
-                           ,
-                         )
-                       )
-                ),
-                column(width = 3,
-                       grid_card(
-                         area = "area2",
-                         card_body(
-                           numericInput(
-                             inputId = "heightFeet",
-                             label = "Feet",
-                             value = 5,
-                             min = 5
-                           ),
-                           numericInput(
-                             inputId = "heightInches",
-                             label = "Inches",
-                             value = ""
-                           )
-                         )
-                       )
-                ),
-                column(width = 3,
-                       grid_card(
-                         area = "area4",
-                         card_body(
-                           textInput(
-                             inputId = "age",
-                             label = "Age",
-                             value = "",
-                             placeholder = "Enter your age"
-                           ),
-                         )
-                       )
-                ),
-              ),
-              column(width = 3,
-                     actionButton("calcMale", "Calculate BMR Male"),
-                     actionButton("calcFemale", "Calculate BMR Female")
-              ),
-              column(width = 6,
-                     plotlyOutput("userComparisonPlot")
-              )
+        fluidRow(
+          column(width = 3,
+                 grid_card(
+                   area = "area1",
+                   card_body(
+                     textInput(
+                       inputId = "currentW",
+                       label = "Enter your current weight",
+                       value = "",
+                       placeholder = "Enter your weight in lbs"
+                     )
+                     ,
+                   )
+                 )
+          ),
+          column(width = 3,
+                 grid_card(
+                   area = "area2",
+                   card_body(
+                     numericInput(
+                       inputId = "heightFeet",
+                       label = "Feet",
+                       value = 5,
+                       min = 5
+                     ),
+                     numericInput(
+                       inputId = "heightInches",
+                       label = "Inches",
+                       value = ""
+                     )
+                   )
+                 )
+          ),
+          column(width = 3,
+                 grid_card(
+                   area = "area4",
+                   card_body(
+                     textInput(
+                       inputId = "age",
+                       label = "Age",
+                       value = "",
+                       placeholder = "Enter your age"
+                     ),
+                   )
+                 )
+          ),
+        ),
+        column(width = 3,
+               actionButton("calcMale", "Calculate BMR Male"),
+               actionButton("calcFemale", "Calculate BMR Female")
+        ),
+        column(width = 6,
+               plotlyOutput("userComparisonPlot")
+        )
       ),
       tabItem(tabName = "TDEE",
               h2("TDEE"),
@@ -147,9 +147,9 @@ ui <- dashboardPage(
                          verbatimTextOutput("caloriesOutput")),
                   fluidRow(
                     column(width = 3,
-                         tableOutput("weightLossTable")),
-                  column(width = 6,
-                        plotOutput("weightLossPlot")),),
+                           tableOutput("weightLossTable")),
+                    column(width = 6,
+                           plotOutput("weightLossPlot")),),
                 )
               ),
 
@@ -157,15 +157,15 @@ ui <- dashboardPage(
       ),
       tabItem(tabName = "macro",
               h2("Macronutrients"),
-                grid_card(
-                  area = "area11",
-                  card_body(
-                    textInput(
-                      inputId = "myCaloriesInput",
-                      label = "Enter Goal Calories ",
-                      value = "",
-                      placeholder = "Calories from second tab"
-                    ),
+              grid_card(
+                area = "area11",
+                card_body(
+                  textInput(
+                    inputId = "myCaloriesInput",
+                    label = "Enter Goal Calories ",
+                    value = "",
+                    placeholder = "Calories from second tab"
+                  ),
 
                 ),
                 column(width = 6,
@@ -173,21 +173,21 @@ ui <- dashboardPage(
                        actionButton("findMacros", "Find my macros!")
                 ),
                 column(
-                width = 12,
-                dataTableOutput("macrosTable"),
-                conditionalPanel(
-                  condition = "input.findMacros > 0",
-                  radioButtons(
-                    inputId = "food",
-                    label = "Food Options",
-                    choices = list(
-                      "Fast Food:" = "1",
-                      "Individual Options" = "2"
+                  width = 12,
+                  dataTableOutput("macrosTable"),
+                  conditionalPanel(
+                    condition = "input.findMacros > 0",
+                    radioButtons(
+                      inputId = "food",
+                      label = "Food Options",
+                      choices = list(
+                        "Fast Food:" = "1",
+                        "Individual Options" = "2"
+                      ),
+                      selected = NULL
                     ),
-                    selected = NULL
+                    actionButton("new", "Lets Eat")
                   ),
-                  actionButton("new", "Lets Eat")
-                ),
 
                 )
               )
@@ -311,11 +311,11 @@ server <- function(input, output, session) {
     bmr <<- as.numeric(input$myTextInput)
     activity_multiplier <- as.numeric(input$workout)
     activity_multiplier <<- switch(input$workout,
-                                  "1" = 1.2,
-                                  "2" = 1.375,
-                                  "3" = 1.55,
-                                  "4" = 1.725,
-                                  "5" = 1.9)
+                                   "1" = 1.2,
+                                   "2" = 1.375,
+                                   "3" = 1.55,
+                                   "4" = 1.725,
+                                   "5" = 1.9)
     # Calculate TDEE (Total Daily Energy Expenditure) based on activity level
 
     tdee <- bmr * activity_multiplier
@@ -351,7 +351,7 @@ server <- function(input, output, session) {
   observeEvent(input$findMacros, {
 
 
-      df <- data.frame(
+    df <- data.frame(
       Calories = solution$recommendedCalories,
       Fat = solution$recommendedFat,
       Protein = solution$recommendedProtein
@@ -389,7 +389,7 @@ server <- function(input, output, session) {
           output$macrosTable <- renderDataTable({
             food
           })
-          }else {
+        }else {
           df <- data.frame(
             Calories = solution$recommendedCalories,
             Fat = solution$recommendedFat,
@@ -408,27 +408,25 @@ server <- function(input, output, session) {
   observeEvent(input$chatGPT, {
     if (input$chatGPT > 0) {
 
-    showModal(modalDialog(
+      showModal(modalDialog(
         title = "Good things come to those who wait",
         paste("Coming up with a custom meal plan based on caloreis:",solution$recommendedCalories ," Protien: ",solution$recommendedProtein, "Fats",solution$recommendedFat),
 
       ))
 
-    mealPlan <- generateMealPlan(solution$recommendedCalories, solution$recommendedProtein, solution$recommendedFat)
+      mealPlan <- generateMealPlan(solution$recommendedCalories, solution$recommendedProtein, solution$recommendedFat)
 
-    mealContent <- sapply(mealPlan$choices, function(choice) {
-      choice$message$content
-    })
+      mealContent <- sapply(mealPlan$choices, function(choice) {
+        choice$message$content
+      })
 
-    # Creating a data frame with the concatenated content
-    mealPlanDF <- data.frame(Food = unlist(strsplit(mealContent, "\n\n")))
+      # Creating a data frame with the concatenated content
+      mealPlanDF <- data.frame(Food = unlist(strsplit(mealContent, "\n\n")))
 
-    output$gptTable <- renderDataTable({
-      mealPlanDF
-    })
-
+      output$gptTable <- renderDataTable({
+        mealPlanDF
+      })
     }
-
 
   })
 }
