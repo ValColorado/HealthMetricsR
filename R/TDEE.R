@@ -13,7 +13,7 @@ calculate_weight_loss <- function(bmr, activity_multiplier, num_weeks = 20) {
 
   # Calculate weekly calorie deficit and weight loss
   calorie_deficit_per_week <- calorie_deficit_per_day * 7
-  weight_loss_per_week <- calorie_deficit_per_week / 3500  # 3500 calories = 1 pound of weight
+  weight_loss_per_week <- calorie_deficit_per_week / 3500
 
 
 

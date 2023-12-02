@@ -32,7 +32,7 @@ ui <- dashboardPage(
                       "Key Terms:",
                       "**Basic Metabolic Rate (BMR)**",
                       "",
-                      "You burn calories even when resting through basic life-sustaining functions like breathing, circulation, nutrient processing, and cell production. This is known as basal metabolic rate (BMR).",
+                      "This is the amount of energy (measured in calories) that your body needs to function at rest, maintaining basic physiological functions like breathing, circulating blood, regulating body temperature, and supporting organ functions. It's the minimum number of calories your body requires to sustain itself while at rest.",
                       "",
                       "",
                       "You can calculate yours by going to the 'Measurements' tab! We calculate this by using the [Mifflin-St. Jeor equation](https://pubmed.ncbi.nlm.nih.gov/2305711/)",
@@ -200,7 +200,8 @@ ui <- dashboardPage(
 # Server logic
 server <- function(input, output, session) {
 
-  data <- read.csv("./../500_Person_Gender_Height_Weight_Index.csv")  # Replace this with your actual dataset file path
+  data <- read.csv("./../500_Person_Gender_Height_Weight_Index.csv")
+  food <- read.csv("food_data.csv")
 
   observeEvent(input$calcMale, {
     weight_kg <- weight.kg(as.numeric(input$currentW))
@@ -273,6 +274,7 @@ server <- function(input, output, session) {
 
 
     bmr <<- as.numeric(input$myTextInput)
+    activity_multiplier <- as.numeric(input$workout)
     activity_multiplier <<- switch(input$workout,
                                   "1" = 1.2,
                                   "2" = 1.375,
@@ -280,7 +282,7 @@ server <- function(input, output, session) {
                                   "4" = 1.725,
                                   "5" = 1.9)
     # Calculate TDEE (Total Daily Energy Expenditure) based on activity level
-    activity_multiplier <- as.numeric(input$workout)
+
     tdee <- bmr * activity_multiplier
 
     # Calculate weight loss projections
@@ -345,7 +347,12 @@ server <- function(input, output, session) {
             })
             do.call(rbind, restaurant_options)
           })
-        } else {
+        }
+        else if(input$food == "2"){
+          output$macrosTable <- renderDataTable({
+            food
+          })
+          }else {
           df <- data.frame(
             Calories = solution$recommendedCalories,
             Fat = solution$recommendedFat,

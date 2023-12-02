@@ -22,3 +22,12 @@ height.cm <- function(x,y) {
     return(inch*2.54)
 }
 
+height.meter <- function(x,y) {
+  #x foot
+  #y inches
+  total_inches <- x * 12 + y  # Total inches
+  height_meters <- total_inches * 0.0254  # Convert inches to meters
+
+  return(height_meters)
+}
+
