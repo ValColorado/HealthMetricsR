@@ -226,7 +226,7 @@ ui <- dashboardPage(
                 ),
                 column(width = 6,
                        height=2,
-                       actionButton("chatGPT", "PLS WORK")
+                       actionButton("chatGPT", "Generate Meal Plan")
                 ),
                 dataTableOutput("gptTable")
 
@@ -409,7 +409,7 @@ server <- function(input, output, session) {
     if (input$chatGPT > 0) {
 
       showModal(modalDialog(
-        title = "Good things come to those who wait",
+        title = "Good Things Come To Those Who Wait",
         paste("Coming up with a custom meal plan based on caloreis:",solution$recommendedCalories ," Protien: ",solution$recommendedProtein, "Fats",solution$recommendedFat),
 
       ))
