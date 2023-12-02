@@ -1,20 +1,27 @@
 calculate_weight_loss <- function(bmr, activity_multiplier, num_weeks = 20) {
   # Calculate calorie deficit based on activity level
   calorie_deficit_per_day <- switch(activity_multiplier,
-                                    "1.2" = 500,   # Sedentary
-                                    "1.375" = 750, # Lightly active
-                                    "1.55" = 1000, # Moderately active
-                                    "1.725" = 1250, # Very active
-                                    "1.9" = 1500   # Extra active
+                                    "1" = 500,   # Sedentary
+                                    "2" = 750, # Lightly active
+                                    "3" = 1000, # Moderately active
+                                    "4" = 1250, # Very active
+                                    "5" = 1500   # Extra active
+  )
+  activity_multiplier <- switch(activity_multiplier,
+                                 "1" = 1.2,
+                                 "2" = 1.375,
+                                 "3" = 1.55,
+                                 "4" = 1.725,
+                                 "5" = 1.9
   )
 
-  # Calculate Total Daily Energy Expenditure (TDEE)
-  tdee <- bmr * activity_multiplier
+
+  tdee <- bmr * as.numeric(activity_multiplier)
+
 
   # Calculate weekly calorie deficit and weight loss
   calorie_deficit_per_week <- calorie_deficit_per_day * 7
   weight_loss_per_week <- calorie_deficit_per_week / 3500
-
 
 
 
@@ -30,8 +37,7 @@ calculate_weight_loss <- function(bmr, activity_multiplier, num_weeks = 20) {
 
 
   #macros
-  recommended_calories <- tdee - calorie_deficit_per_day
-
+  recommended_calories <- tdee
   # Calculate recommended fat intake (assuming 25% of total calories from fats)
   fat_calories <- 0.25 * recommended_calories
   recommended_fat_grams <- fat_calories / 9  # 1 gram of fat has 9 calories

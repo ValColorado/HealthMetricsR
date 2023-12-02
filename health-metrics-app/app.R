@@ -13,7 +13,8 @@ ui <- dashboardPage(
       menuItem("Home", tabName = "home", icon = icon("home")),
       menuItem("Measurements", tabName = "measurements", icon = icon("dashboard")),
       menuItem("Total Daily Energy Expenditure", tabName = "TDEE", icon = icon("person-walking")),
-      menuItem("Macronutrients", tabName = "macro", icon=icon("utensils"))
+      menuItem("Macronutrients", tabName = "macro", icon=icon("utensils")),
+      menuItem("Meal Plan", tabName = "gpt")
     )
   ),
   dashboardBody(
@@ -156,7 +157,6 @@ ui <- dashboardPage(
       ),
       tabItem(tabName = "macro",
               h2("Macronutrients"),
-
                 grid_card(
                   area = "area11",
                   card_body(
@@ -190,6 +190,45 @@ ui <- dashboardPage(
                 ),
 
                 )
+              )
+
+      ),
+      tabItem(tabName = "gpt",
+
+              grid_card(
+                area = "area11",
+                card_body(
+                  textInput(
+                    inputId = "myCaloriesInputNew",
+                    label = "Enter Goal Calories ",
+                    value = "",
+                    placeholder = "Calories from 3rd tab"
+                  ),
+
+                ),
+                card_body(
+                  textInput(
+                    inputId = "myProtienInput",
+                    label = "Enter Goal Protien ",
+                    value = "",
+                    placeholder = "Protien from 3rd tab"
+                  ),
+
+                ),
+                card_body(
+                  textInput(
+                    inputId = "myFatInput",
+                    label = "Enter Goal Fats ",
+                    value = "",
+                    placeholder = "Fat from 3rd tab"
+                  ),
+
+                ),
+                column(width = 6,
+                       height=2,
+                       actionButton("chatGPT", "PLS WORK")
+                ),
+                dataTableOutput("gptTable")
 
               )
 
@@ -211,7 +250,6 @@ server <- function(input, output, session) {
     bmr_male <- BMR_male.Mifflin(weight_kg, height_cm, age)
     bmr_male_rounded <- round(bmr_male, 2)
 
-    print(bmr_male_rounded)
     showModal(modalDialog(
       title = "BMR Calculation (Male)",
       paste("Your BMR (Male) based on Mifflin-St Jeor equation is:", bmr_male_rounded),
@@ -233,20 +271,17 @@ server <- function(input, output, session) {
 
     updateTextInput(session, "myTextInput", value = as.character(bmr_male_rounded))
 
+
   })
 
   observeEvent(input$calcFemale, {
     weight_kg <- weight.kg(as.numeric(input$currentW))
     height_cm <- (as.numeric(input$heightFeet) * 30.48) + (as.numeric(input$heightInches) * 2.54)  # feet/inches to cm
     age <- as.numeric(input$age)
-    print("here")
-    print(weight_kg)
-    print(height_cm)
-    print(age)
+
     bmr_female <- BMR_female.Mifflin(weight_kg, height_cm, age)
     bmr_female_rounded <- round(bmr_female, 2)
 
-    print(bmr_female_rounded)
     showModal(modalDialog(
       title = "BMR Calculation (Female)",
       paste("Your BMR (Female) based on Mifflin-St Jeor equation is:", bmr_female_rounded),
@@ -307,6 +342,8 @@ server <- function(input, output, session) {
 
 
     updateTextInput(session, "myCaloriesInput", value = as.character(solution$recommendedCalories))
+    updateTextInput(session, "myCaloriesInputNew", value = as.character(solution$recommendedCalories))
+
 
 
   })
@@ -365,6 +402,33 @@ server <- function(input, output, session) {
         }
       }
     })
+    updateTextInput(session, "myProtienInput", value = as.character(solution$recommendedProtein))
+    updateTextInput(session, "myFatInput", value = as.character(solution$recommendedFat))
+  })
+  observeEvent(input$chatGPT, {
+    if (input$chatGPT > 0) {
+
+    showModal(modalDialog(
+        title = "Good things come to those who wait",
+        paste("Coming up with a custom meal plan based on caloreis:",solution$recommendedCalories ," Protien: ",solution$recommendedProtein, "Fats",solution$recommendedFat),
+
+      ))
+
+    mealPlan <- generateMealPlan(solution$recommendedCalories, solution$recommendedProtein, solution$recommendedFat)
+
+    mealContent <- sapply(mealPlan$choices, function(choice) {
+      choice$message$content
+    })
+
+    # Creating a data frame with the concatenated content
+    mealPlanDF <- data.frame(Food = unlist(strsplit(mealContent, "\n\n")))
+
+    output$gptTable <- renderDataTable({
+      mealPlanDF
+    })
+
+    }
+
 
   })
 }
