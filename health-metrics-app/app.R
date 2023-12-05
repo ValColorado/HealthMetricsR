@@ -4,6 +4,8 @@ library(MyFitnessFriend)
 library(plotly)  # Adding the plotly library
 library(ggplot2)
 library(openintro)
+library(httr)
+library(jsonlite)
 
 ui <- dashboardPage(
 
@@ -408,13 +410,17 @@ server <- function(input, output, session) {
   observeEvent(input$chatGPT, {
     if (input$chatGPT > 0) {
 
+      targetCalories <- ifelse(input$myCaloriesInputNew != "", as.numeric(input$myCaloriesInputNew), solution$recommendedCalories)
+      targetProtein <- ifelse(input$myProtienInput != "", as.numeric(input$myProtienInput), solution$recommendedProtein)
+      targetFat <- ifelse(input$myFatInput != "", as.numeric(input$myFatInput), solution$recommendedFat)
+
       showModal(modalDialog(
         title = "Good Things Come To Those Who Wait",
-        paste("Coming up with a custom meal plan based on caloreis:",solution$recommendedCalories ," Protien: ",solution$recommendedProtein, "Fats",solution$recommendedFat),
+        paste("Coming up with a custom meal plan based on caloreis:",targetCalories ," Protien: ",targetProtein, "Fats",targetFat),
 
       ))
 
-      mealPlan <- generateMealPlan(solution$recommendedCalories, solution$recommendedProtein, solution$recommendedFat)
+      mealPlan <- generateMealPlan(targetCalories, targetProtein, targetFat)
 
       mealContent <- sapply(mealPlan$choices, function(choice) {
         choice$message$content
