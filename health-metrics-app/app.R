@@ -1,11 +1,15 @@
 library(shiny)
 library(shinydashboard)
-library(MyFitnessFriend)
+#library(MyFitnessFriend)
 library(plotly)  # Adding the plotly library
 library(ggplot2)
 library(openintro)
 library(httr)
 library(jsonlite)
+library(gridlayout)
+library(bslib)
+library(DT)
+
 
 ui <- dashboardPage(
 
@@ -241,14 +245,17 @@ ui <- dashboardPage(
 # Server logic
 server <- function(input, output, session) {
 
-  data <- read.csv("./../500_Person_Gender_Height_Weight_Index.csv")
-  food <- read.csv("food_data.csv")
+  data <- read.csv("./dataset/500_Person_Gender_Height_Weight_Index.csv")
+  food <- read.csv("./dataset/food_data.csv")
 
   observeEvent(input$calcMale, {
+
+    source("./R/weight-conversion.R")
     weight_kg <- weight.kg(as.numeric(input$currentW))
     height_cm <- (as.numeric(input$heightFeet) * 30.48) + (as.numeric(input$heightInches) * 2.54)  # feet/inches to cm
     age <- as.numeric(input$age)
 
+    source("./R/BMR.R")
     bmr_male <- BMR_male.Mifflin(weight_kg, height_cm, age)
     bmr_male_rounded <- round(bmr_male, 2)
 
@@ -309,7 +316,7 @@ server <- function(input, output, session) {
 
   observeEvent(input$calculateButtonTDEE, {
 
-
+    source("health-metrics-app/R/TDEE.R")
     bmr <<- as.numeric(input$myTextInput)
     activity_multiplier <- as.numeric(input$workout)
     activity_multiplier <<- switch(input$workout,
@@ -409,6 +416,8 @@ server <- function(input, output, session) {
   })
   observeEvent(input$chatGPT, {
     if (input$chatGPT > 0) {
+
+      source("./health-metrics-app/R/gpt.R")
 
       targetCalories <- ifelse(input$myCaloriesInputNew != "", as.numeric(input$myCaloriesInputNew), solution$recommendedCalories)
       targetProtein <- ifelse(input$myProtienInput != "", as.numeric(input$myProtienInput), solution$recommendedProtein)
