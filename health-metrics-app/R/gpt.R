@@ -17,10 +17,10 @@ library(httr)
 library(jsonlite)
 generateMealPlan <- function(calories, protein, fats) {
 
-  apiKey <- "API-KEY"
+  apiKey <- Sys.getenv('GPT_API_KEY')
   prompt <- paste("If I eat", calories, "calories per day with", protein, "grams of protein and", fats, "grams of fats, give me food options and list their macros and a food recipes ideas next to each item")
 
-  response <- POST(
+  response <- httr::POST(
     url = "https://api.openai.com/v1/chat/completions",
     add_headers(Authorization = paste("Bearer", apiKey)),
     content_type_json(),

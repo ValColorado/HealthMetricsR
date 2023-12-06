@@ -5,7 +5,7 @@ account: valentina-colorado-myfitnessfriend
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 10723281
-bundleId: 8011212
+bundleId: 8015183
 url: https://valentina-colorado-myfitnessfriend.shinyapps.io/myFitnessFriend/
 version: 1
 asMultiple: FALSE

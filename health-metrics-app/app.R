@@ -20,7 +20,7 @@ ui <- dashboardPage(
       menuItem("Measurements", tabName = "measurements", icon = icon("dashboard")),
       menuItem("Total Daily Energy Expenditure", tabName = "TDEE", icon = icon("person-walking")),
       menuItem("Macronutrients", tabName = "macro", icon=icon("utensils")),
-      menuItem("Meal Plan", tabName = "gpt")
+      menuItem("Meal Plan", tabName = "gpt", icon = icon("robot"))
     )
   ),
   dashboardBody(
@@ -33,22 +33,39 @@ ui <- dashboardPage(
                 card_body(
                   markdown(
                     mds = c(
-                      "Before we get started I want to say .. these are **generalized** guidelines and should be adjusted based on individual needs and goals. Consulting a nutritionist or dietitian could provide personalized recommendations.",
+                      "Before we get started, it's important to note that these are **generalized** guidelines. Individual needs and goals should be considered. Consulting a nutritionist or dietitian could provide personalized recommendations.",
                       "",
                       "",
-                      "Key Terms:",
-                      "**Basic Metabolic Rate (BMR)**",
-                      "",
-                      "This is the amount of energy (measured in calories) that your body needs to function at rest, maintaining basic physiological functions like breathing, circulating blood, regulating body temperature, and supporting organ functions. It's the minimum number of calories your body requires to sustain itself while at rest.",
+                      "**Application Breakdown:**",
                       "",
                       "",
-                      "You can calculate yours by going to the 'Measurements' tab! We calculate this by using the [Mifflin-St. Jeor equation](https://pubmed.ncbi.nlm.nih.gov/2305711/)",
+                      "**Measurements** - Finding your Basic Metabolic Rate (BMR)",
+                      "",
+                      "Your Basal Metabolic Rate (BMR) represents the energy (measured in calories) your body needs to function at rest. It includes maintaining basic physiological functions like breathing, blood circulation, temperature regulation, and organ support. It's the minimum calories your body requires while at rest.",
                       "",
                       "",
-                      "**Total Daily Energy Expenditure [TDEE](https://www.forbes.com/health/body/tdee-calculator/)**",
+                      "Calculate your BMR based on the [Mifflin-St. Jeor equation](https://pubmed.ncbi.nlm.nih.gov/2305711/) using your weight (lb), height (foot, inches), and age.",
                       "",
-                      "estimates the amount of energy (or number of calories) your body burns over a 24-hour period, factoring in how much energy it uses while at rest, your typical level of physical activity and the thermic effect of food metabolism."
+                      "",
+                      "**Total Daily Energy Expenditure** [TDEE](https://www.forbes.com/health/body/tdee-calculator/)",
+                      "",
+                      "The Total Daily Energy Expenditure (TDEE) estimates the calories your body burns over 24 hours. It factors in resting energy usage, physical activity level, and food metabolism's thermic effect.",
+                      "",
+                      "From the BMR calculated earlier and your activity level, determine the calories needed to burn weekly for weight loss.",
+                      "Compare your data with a sample [dataset](https://www.kaggle.com/datasets/yersever/500-person-gender-height-weight-bodymassindex) from Kaggle using the rendered plot.",
+                      "",
+                      "**Macronutrients**",
+                      "",
+                      "Based on your goal calories from the previous tab, derive your target fats and proteins for your diet.",
+                      "Explore fast food options with protein content equal to or less than your goal using the 'fastfood' dataset from the openintro package.",
+                      "",
+                      "Alternatively, access nutritional information for various food items using a [food nutrition dataset](https://www.kaggle.com/datasets/shrutisaxena/food-nutrition-dataset) from Kaggle if you prefer options other than fast food.",
+                      "",
+                      "**Meal Plan**",
+                      "",
+                      "Utilize the chatGPT API to generate a personalized meal plan. It's based on calculated calories, proteins, and fats obtained from the macronutrients tab."
                     )
+
                   )
                 )
               )
@@ -316,7 +333,7 @@ server <- function(input, output, session) {
 
   observeEvent(input$calculateButtonTDEE, {
 
-    source("health-metrics-app/R/TDEE.R")
+    source("./R/TDEE.R")
     bmr <<- as.numeric(input$myTextInput)
     activity_multiplier <- as.numeric(input$workout)
     activity_multiplier <<- switch(input$workout,
@@ -417,18 +434,17 @@ server <- function(input, output, session) {
   observeEvent(input$chatGPT, {
     if (input$chatGPT > 0) {
 
-      source("./health-metrics-app/R/gpt.R")
+      source("./R/gpt.R")
 
       targetCalories <- ifelse(input$myCaloriesInputNew != "", as.numeric(input$myCaloriesInputNew), solution$recommendedCalories)
       targetProtein <- ifelse(input$myProtienInput != "", as.numeric(input$myProtienInput), solution$recommendedProtein)
       targetFat <- ifelse(input$myFatInput != "", as.numeric(input$myFatInput), solution$recommendedFat)
 
       showModal(modalDialog(
-        title = "Good Things Come To Those Who Wait",
+        title = "Good Things Come To Those Who Wait(This could take up to 45 seconds)",
         paste("Coming up with a custom meal plan based on caloreis:",targetCalories ," Protien: ",targetProtein, "Fats",targetFat),
 
       ))
-
       mealPlan <- generateMealPlan(targetCalories, targetProtein, targetFat)
 
       mealContent <- sapply(mealPlan$choices, function(choice) {
@@ -436,7 +452,7 @@ server <- function(input, output, session) {
       })
 
       # Creating a data frame with the concatenated content
-      mealPlanDF <- data.frame(Food = unlist(strsplit(mealContent, "\n\n")))
+      mealPlanDF <- data.frame(Food = unlist(strsplit(as.character(mealContent), "\n\n")))
 
       output$gptTable <- renderDataTable({
         mealPlanDF
