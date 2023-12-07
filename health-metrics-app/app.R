@@ -63,7 +63,9 @@ ui <- dashboardPage(
                       "",
                       "**Meal Plan**",
                       "",
-                      "Utilize the chatGPT API to generate a personalized meal plan. It's based on calculated calories, proteins, and fats obtained from the macronutrients tab."
+                      "Utilize the chatGPT API to generate a personalized meal plan. It's based on calculated calories, proteins, and fats obtained from the macronutrients tab.",
+                      "",
+                      "The code is hosted in my [GitHib Repo](https://github.com/ValColorado/MyFitnessFriend)"
                     )
 
                   )

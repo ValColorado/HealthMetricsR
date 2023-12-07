@@ -4,4 +4,7 @@ MyFitnessFriend is the culmination of my Master's program learnings, presented a
 
 Explore the Shiny app at: [MyFitnessFriend Shiny App](https://valentina-colorado-myfitnessfriend.shinyapps.io/myFitnessFriend/)
 
+
+![]("./images/workout.gif")
+
 **This app is still under construction 🚧 🏗️**
